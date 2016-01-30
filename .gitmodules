@@ -1,0 +1,3 @@
+[submodule "3rd/qtermwidget"]
+	path = 3rd/qtermwidget
+	url = https://github.com/lxde/qtermwidget.git

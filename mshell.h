@@ -14,7 +14,8 @@ public:
     virtual void keyPressEvent(QKeyEvent *);
     bool commitCurrentLine(bool moveCursor);
     bool commit(QTextCursor &, int resetPos);
-
+    int columns();
+    int rows();
 private:
     QTextCharFormat cmdlineFormat;
     QTextBlockFormat cleanFormat;

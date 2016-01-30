@@ -5,6 +5,9 @@
 #include <QTextBlock>
 #include <QTextCursor>
 #include <QTextDocumentFragment>
+#include "mptyexecutor.h"
+#include "mterminal.h"
+
 MShell::MShell(QWidget *parent) : QTextEdit(parent)
 {
     QShortcut *s;
@@ -40,18 +43,37 @@ bool MShell::commitCurrentLine(bool moveCursor)
 
 bool MShell::commit(QTextCursor &cursor, int resetPos)
 {
+    QString cmd = cursor.selectedText();
     cursor.beginEditBlock();
     cursor.setCharFormat(this->cmdlineFormat);
-    MDumbTerminal *terminal = new MDumbTerminal(cursor, this);
     cursor.setPosition(cursor.selectionEnd());
     cursor.clearSelection();
 
     cursor.movePosition(QTextCursor::EndOfLine);
-    if(resetPos != -1)
-        cursor.setPosition(resetPos);
     cursor.setCharFormat(QTextCharFormat());
+    cursor.insertBlock();
+    if(resetPos != -1) {
+        QTextCursor userCursor(cursor);
+        userCursor.setPosition(resetPos);
+        this->setTextCursor(userCursor);
+    }
     cursor.endEditBlock();
-    this->setTextCursor(cursor);
-    terminal->exec();
+
+    MAbstractExecutor *executor = new MPtyExecutor(this);
+    MTerminal *terminal = new MTerminal(cursor, executor);
+    executor->resize(this->rows(), this->columns());
+    connect(executor, SIGNAL(receivedData(const char*,int)), terminal, SLOT(onReceivedData(const char*,int)));
+    executor->execute("/bin/sh", QStringList() << "/bin/sh" << "-c" << cmd);
+    connect(executor, SIGNAL(finished(int,QProcess::ExitStatus)), executor, SLOT(deleteLater()));
     return true;
+}
+
+int MShell::columns()
+{
+    return this->width() / this->fontMetrics().width("m");
+}
+
+int MShell::rows()
+{
+    return this->height() / this->fontMetrics().height();
 }

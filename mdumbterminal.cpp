@@ -30,8 +30,7 @@ void MDumbTerminal::exec()
 
     this->process = new QProcess(this);
     this->process->start(shell, QStringList() << "-c" << cmd);
-    qDebug() << this->process->arguments();
-    connect(this->process, SIGNAL(readyReadStandardOutput()), this, SLOT(onReadyReadStandardOutput()));:
+    connect(this->process, SIGNAL(readyReadStandardOutput()), this, SLOT(onReadyReadStandardOutput()));
     connect(this->process, SIGNAL(readyReadStandardError()), this, SLOT(onReadyReadStandardError()));
     connect(this->process, SIGNAL(finished(int)), this, SLOT(onFinished(int)));
     this->outCursor = QTextCursor(this->cmdCursor);
